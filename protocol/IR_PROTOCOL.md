@@ -4,22 +4,36 @@
 
 ESP32 → IR emitter → IR receiver → Raspberry Pi Pico.
 
-## Command layer
+## Physical layer
 
-V1 uses explicit command frames rather than treating the IR receiver output as a direct laser switch.
+The ESP32 emits a **38 kHz modulated IR carrier**. The expected receiver is a demodulating IR receiver module with an active-LOW digital output.
 
-Reserved commands:
+## Frame
 
-- `LASER_ON`
-- `LASER_OFF`
-- `PING`
-- `STATUS`
+V1 uses a NEC-compatible 32-bit frame:
 
-The exact carrier frequency, timing, checksum/framing, and receiver module behavior must be verified against the physical IR hardware before finalizing the protocol.
+```text
+9 ms mark + 4.5 ms space
+ADDRESS      = 0x00
+ADDRESS_INV  = 0xFF
+COMMAND      = command byte
+COMMAND_INV  = bitwise inverse of command
+560 us stop mark
+```
 
-## Design goals
+Commands:
 
-- Reject malformed commands.
-- Avoid accidental laser activation from noise.
-- Provide serial diagnostics during testing.
+| Command | Byte |
+|---|---:|
+| LASER_OFF | `0xA0` |
+| LASER_ON | `0xA1` |
+
+The Pico validates the inverse bytes before accepting a command. Unknown commands are ignored and printed to Serial.
+
+## Safety / reliability goals
+
+- Reject malformed frames.
+- Require a valid NEC frame before changing the laser state.
+- Keep the laser OFF after Pico boot until a valid `LASER_ON` command is received.
+- Provide Serial diagnostics.
 - Leave room for protocol versioning in V2.
