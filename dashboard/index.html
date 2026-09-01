@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>REACTANCE I // COMMAND</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<div class="scanline"></div>
+<header><div><span class="eyebrow">SECURITY CONTROL NETWORK</span><h1>REACTANCE <b>I</b></h1></div><div id="clock">--:--:--</div></header>
+<main>
+<section class="hero"><div><div class="label">SYSTEM STATE</div><div id="mode" class="state">OFFLINE / DISARMED</div></div><div id="connection" class="pill bad">● LINK UNKNOWN</div></section>
+<section class="grid">
+<article class="card"><span>SYSTEM</span><strong id="systemValue">DISARMED</strong><small id="systemSub">Awaiting command</small></article>
+<article class="card"><span>LASER</span><strong id="laserValue">OFF</strong><small id="laserSub">Remote controller</small></article>
+<article class="card"><span>BEAM</span><strong id="beamValue">UNKNOWN</strong><small id="beamSub">LDR telemetry</small></article>
+<article class="card"><span>LOCAL ALARM</span><strong id="alarmValue">QUIET</strong><small>Audible output</small></article>
+<article class="card"><span>TRIGGERS</span><strong id="triggerValue">0</strong><small>Beam interruptions</small></article>
+<article class="card"><span>UPTIME</span><strong id="uptimeValue">00:00:00</strong><small>ESP32 runtime</small></article>
+</section>
+<section class="controls">
+<h2>COMMAND DECK</h2>
+<div class="buttons">
+<button data-action="/api/arm/loud" class="loud">ARM LOUD<span>ACTIVATE</span></button>
+<button data-action="/api/arm/silent" class="silent">ARM SILENT<span>ACTIVATE</span></button>
+<button data-action="/api/disarm" class="danger">DISARM<span>DEACTIVATE</span></button>
+<button data-action="/api/alarm/silence">SILENCE ALARM<span>STANDBY</span></button>
+</div></section>
+<section class="registry"><div class="registryHead"><h2>EVENT REGISTRY</h2><span id="eventCount">0 EVENTS</span></div><div id="events"><div class="empty">NO EVENTS RECEIVED</div></div></section>
+</main>
+<script src="app.js"></script>
+</body></html>
