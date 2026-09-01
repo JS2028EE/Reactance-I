@@ -6,6 +6,7 @@
 constexpr int PIN_LDR=34, PIN_IR_EMITTER=25, PIN_BUZZER=26;
 const char* WIFI_SSID="YOUR_WIFI_SSID";
 const char* WIFI_PASSWORD="YOUR_WIFI_PASSWORD";
+ // IMPORTANT: this must point to the Cloudflare Worker /notify endpoint, NOT the GitHub Pages website.
 const char* NOTIFY_URL="https://reactance-i.jhostins099.workers.dev/notify"; // IMPORTANT: this must point to the Cloudflare Worker /notify endpoint, NOT the GitHub Pages website.
 const char* NOTIFY_DEVICE_KEY="YOUR_REACTANCE_DEVICE_KEY";
 WebServer server(80); Preferences prefs;
