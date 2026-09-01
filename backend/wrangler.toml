@@ -1,0 +1,9 @@
+name = "reactance-i-notify"
+main = "worker.js"
+compatibility_date = "2026-08-31"
+
+[observability]
+enabled = true
+
+[secrets]
+required = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID", "REACTANCE_DEVICE_KEY"]
