@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05070b" />
+  <title>REACTANCE I // SECURITY CONTROL</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="scanlines"></div>
+  <header class="topbar">
+    <div><span class="brand">REACTANCE I</span><span class="subtitle">LASER SECURITY CONTROL</span></div>
+    <div class="connection"><span id="connectionDot" class="dot offline"></span><span id="connectionText">OFFLINE</span></div>
+  </header>
+
+  <main class="shell">
+    <section class="hero">
+      <div><p class="eyebrow">SYSTEM COMMAND INTERFACE</p><h1>REACTANCE <span>I</span></h1><p>Laser-triggered wireless alarm telemetry and control.</p></div>
+      <div class="clock"><div id="clock">--:--:--</div><small id="date">----</small></div>
+    </section>
+
+    <section class="status-grid">
+      <article class="panel main-status"><div class="panel-head"><span>SYSTEM STATE</span><span id="systemBadge" class="badge">OFF</span></div><div id="systemState" class="state">SYSTEM OFFLINE</div><div id="stateDetail" class="muted">Waiting for controller telemetry.</div></article>
+      <article class="panel"><div class="panel-head"><span>LASER</span><span id="laserBadge" class="badge">UNKNOWN</span></div><div id="laserStatus" class="metric">—</div><div class="muted">Remote Pico output</div></article>
+      <article class="panel"><div class="panel-head"><span>BEAM</span><span id="beamBadge" class="badge">UNKNOWN</span></div><div id="beamStatus" class="metric">—</div><div class="muted">LDR telemetry</div></article>
+      <article class="panel"><div class="panel-head"><span>ALARM</span><span id="alarmBadge" class="badge">OFF</span></div><div id="alarmStatus" class="metric">—</div><div class="muted">Local buzzer state</div></article>
+    </section>
+
+    <section class="control-grid">
+      <article class="panel controls"><div class="panel-head"><span>COMMAND DECK</span><span class="muted">CONTROL</span></div>
+        <button data-command="arm_loud" class="cmd loud">ARM LOUD<span>Activate system + local alarm</span></button>
+        <button data-command="arm_silent" class="cmd silent">ARM SILENT<span>Activate system + phone alert mode</span></button>
+        <button data-command="disarm" class="cmd danger">DISARM<span>Deactivate monitoring</span></button>
+        <div class="mode-row"><button data-command="laser_on" class="mini">LASER ON</button><button data-command="laser_off" class="mini">LASER OFF</button></div>
+        <div id="commandResult" class="command-result">READY</div>
+      </article>
+      <article class="panel telemetry"><div class="panel-head"><span>TELEMETRY</span><span class="muted">LIVE</span></div>
+        <div class="telemetry-grid"><div><small>TRIGGERS</small><strong id="triggerCount">0</strong></div><div><small>ACTIVATIONS</small><strong id="activationCount">0</strong></div><div><small>DEACTIVATIONS</small><strong id="deactivationCount">0</strong></div><div><small>UPTIME</small><strong id="uptime">—</strong></div></div>
+      </article>
+    </section>
+
+    <section class="panel registry"><div class="panel-head"><span>EVENT REGISTRY</span><span id="eventCount" class="muted">0 EVENTS</span></div><div id="events" class="events"><div class="empty">No events loaded.</div></div></section>
+  </main>
+  <footer>REACTANCE I // V1 // EMBEDDED SECURITY SYSTEM</footer>
+  <script src="app.js"></script>
+</body>
+</html>
