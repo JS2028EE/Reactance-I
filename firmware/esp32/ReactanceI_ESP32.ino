@@ -6,8 +6,9 @@
 constexpr int PIN_LDR=34, PIN_IR_EMITTER=25, PIN_BUZZER=26;
 const char* WIFI_SSID="YOUR_WIFI_SSID";
 const char* WIFI_PASSWORD="YOUR_WIFI_PASSWORD";
-const char* NOTIFY_URL=""; // HTTPS worker /notify URL.
-const char* NOTIFY_DEVICE_KEY=""; // Same value as Cloudflare REACTANCE_DEVICE_KEY.
+// IMPORTANT: this must point to the Cloudflare Worker /notify endpoint, NOT the GitHub Pages website.
+const char* NOTIFY_URL="https://reactance-i.jhostins099.workers.dev/notify";
+const char* NOTIFY_DEVICE_KEY="YOUR_REACTANCE_DEVICE_KEY";
 WebServer server(80); Preferences prefs;
 
 enum SystemMode:uint8_t{OFF,ARMED_LOUD,ARMED_SILENT};
@@ -21,20 +22,13 @@ void respond(int code,const String& body){cors();server.send(code,"application/j
 void logEvent(EventType t,int v=0){events[eventHead]={(uint32_t)((millis()-bootMs)/1000UL),(uint8_t)t,v};eventHead=(eventHead+1)%MAX_EVENTS;if(eventCount<MAX_EVENTS)eventCount++;}
 void persist(){prefs.putUInt("triggers",triggerCount);prefs.putUInt("activations",activationCount);prefs.putUInt("deactivations",deactivationCount);}
 
-// 38 kHz IR carrier. The IR receiver should be a demodulating module with an active-LOW output.
 void irMark(uint32_t us){uint32_t start=micros();while(micros()-start<us){digitalWrite(PIN_IR_EMITTER,LOW);delayMicroseconds(13);digitalWrite(PIN_IR_EMITTER,HIGH);delayMicroseconds(13);}}
 void irSpace(uint32_t us){digitalWrite(PIN_IR_EMITTER,HIGH);delayMicroseconds(us);}
-void sendIR(uint8_t command){
-  // Custom NEC-compatible frame: address 0x00, inverse 0xFF, command, inverse command.
-  irMark(9000); irSpace(4500);
-  uint8_t bytes[4]={0x00,0xFF,command,(uint8_t)~command};
-  for(uint8_t b:bytes) for(uint8_t i=0;i<8;i++){irMark(560);irSpace((b&(1<<i))?1690:560);}
-  irMark(560); irSpace(560); digitalWrite(PIN_IR_EMITTER,HIGH);
-}
+void sendIR(uint8_t command){irMark(9000);irSpace(4500);uint8_t bytes[4]={0x00,0xFF,command,(uint8_t)~command};for(uint8_t b:bytes)for(uint8_t i=0;i<8;i++){irMark(560);irSpace((b&(1<<i))?1690:560);}irMark(560);irSpace(560);digitalWrite(PIN_IR_EMITTER,HIGH);}
 void commandLaser(bool on){laserCommandedOn=on;sendIR(on?0xA1:0xA0);logEvent(on?EVT_LASER_ON:EVT_LASER_OFF);}
 String modeName(){return mode==ARMED_LOUD?"ARMED_LOUD":mode==ARMED_SILENT?"ARMED_SILENT":"OFF";}
 String statusJson(){String s="{";s+="\"system\":\""+(mode==OFF?String("OFF"):String("ARMED"))+"\",";s+="\"mode\":\""+modeName()+"\",";s+="\"laser\":"+(laserCommandedOn?String("true"):String("false"))+",";s+="\"beam\":"+(beamDetected?String("true"):String("false"))+",";s+="\"alarm\":"+(alarmActive?String("true"):String("false"))+",";s+="\"ldr\":"+String(analogRead(PIN_LDR))+",";s+="\"baseline\":"+String(baseline)+",";s+="\"triggers\":"+String(triggerCount)+",";s+="\"activations\":"+String(activationCount)+",";s+="\"deactivations\":"+String(deactivationCount)+",";s+="\"uptime_s\":"+String((millis()-bootMs)/1000UL)+"}";return s;}
-void notifyEvent(const String& msg){if(strlen(NOTIFY_URL)==0||strlen(NOTIFY_DEVICE_KEY)==0)return;HTTPClient http;if(!http.begin(NOTIFY_URL))return;http.addHeader("Content-Type","application/json");http.addHeader("Authorization",String("Bearer ")+NOTIFY_DEVICE_KEY);String body="{\"message\":\"";for(size_t i=0;i<msg.length();i++){char c=msg[i];if(c=='\\'||c=='\"')body+='\\';body+=c;}body+="\"}";int code=http.POST(body);http.end();if(code>=200&&code<300)logEvent(EVT_NOTIFY,code);}
+void notifyEvent(const String& msg){if(strlen(NOTIFY_URL)==0||strlen(NOTIFY_DEVICE_KEY)==0)return;HTTPClient http;if(!http.begin(NOTIFY_URL))return;http.addHeader("Content-Type","application/json");http.addHeader("Authorization",String("Bearer ")+NOTIFY_DEVICE_KEY);String body="{\"event\":\"BEAM_INTERRUPTED\",\"systemState\":\"ARMED\",\"mode\":\"SILENT\",\"laserStatus\":\"ACTIVE\",\"beamStatus\":\"INTERRUPTED\",\"triggerCount\":"+String(triggerCount)+",\"message\":\"";for(size_t i=0;i<msg.length();i++){char c=msg[i];if(c=='\\'||c=='\"')body+='\\';body+=c;}body+="\"}";int code=http.POST(body);http.end();if(code>=200&&code<300)logEvent(EVT_NOTIFY,code);}
 void setMode(SystemMode m){if(mode==m)return;if(m==OFF){mode=OFF;commandLaser(false);digitalWrite(PIN_BUZZER,LOW);alarmActive=false;deactivationCount++;logEvent(EVT_DISARM);}else{mode=m;activationCount++;logEvent(EVT_ARM,(int)m);commandLaser(true);delay(300);baseline=analogRead(PIN_LDR);previousBeamDetected=false;}persist();}
 void evaluateBeam(){int reading=analogRead(PIN_LDR);if(mode==OFF){beamDetected=false;previousBeamDetected=false;return;}int threshold=max(30,baseline/4);beamDetected=reading>threshold;if(beamDetected!=previousBeamDetected){if(!beamDetected){triggerCount++;lastTriggerMs=millis();logEvent(EVT_BEAM_BREAK,reading);if(mode==ARMED_LOUD){alarmActive=true;digitalWrite(PIN_BUZZER,HIGH);logEvent(EVT_ALARM_ON);}else if(mode==ARMED_SILENT){notifyEvent("BEAM INTERRUPTION DETECTED");}persist();}else logEvent(EVT_BEAM_RESTORE,reading);previousBeamDetected=beamDetected;}if(beamDetected)baseline=(baseline*31+reading)/32;}
 void handleStatus(){respond(200,statusJson());}
