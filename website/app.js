@@ -25,7 +25,7 @@ function paint(raw){
   $('events').innerHTML=events.length?events.slice().reverse().map(e=>`<div class="event"><span class="time">${escapeHtml(e.time||`T+${e.t??0}s`)}</span><span class="type">${escapeHtml(eventName(e.type))}</span><span>${escapeHtml(e.detail||(`value=${e.value??0}`))}</span></div>`).join(''):'<div class="empty">No events loaded.</div>';
   document.querySelectorAll('.cmd').forEach(b=>b.classList.toggle('active',(s.mode==='ARMED_LOUD'&&b.dataset.command==='arm_loud')||(s.mode==='ARMED_SILENT'&&b.dataset.command==='arm_silent')||(s.system==='OFF'&&b.dataset.command==='disarm')));
 }
-function eventName(n){return ['BOOT','ARM','DISARM','MODE','LASER_ON','LASER_OFF','BEAM_BREAK','BEAM_RESTORE','ALARM_ON','ALARM_OFF'][Number(n)]||`EVENT_${n}`}
+function eventName(n){return ['BOOT','ARM','DISARM','MODE','LASER_ON','LASER_OFF','BEAM_BREAK','BEAM_RESTORE','ALARM_ON','ALARM_OFF','NOTIFY'][Number(n)]||`EVENT_${n}`}
 function formatUptime(sec){sec=Number(sec)||0;const d=Math.floor(sec/86400),h=Math.floor(sec%86400/3600),m=Math.floor(sec%3600/60),s=Math.floor(sec%60);return `${d}d ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`}
 function escapeHtml(v){return String(v).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\':'&#92;','"':'&quot;'}[c]))}
 async function api(path,options={}){if(!API_BASE)throw new Error('Set the ESP32 API URL in browser storage: localStorage.setItem("reactanceApi","http://ESP32-IP")');const r=await fetch(`${API_BASE}${path}`,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})}});if(!r.ok)throw new Error(`HTTP ${r.status}`);return r.json()}

@@ -81,3 +81,11 @@ A GitHub Pages site is public HTTPS, while an ESP32 on a home Wi-Fi network norm
 ## Hardware warning
 
 Verify the pin constants against the actual wiring before powering the final system. A laser or buzzer module should be driven through an appropriate transistor/MOSFET driver when its current requirement exceeds safe GPIO capability.
+
+## Current status and setup
+
+This repository contains prototype firmware, two dashboard versions, and a notification gateway foundation. It does not establish that the complete hardware/cloud path has passed integration testing. `website/` is the current Pages dashboard; `dashboard/` is retained as an earlier implementation.
+
+ESP32 firmware uses the ESP32 board package. Pico firmware uses the RP2040 Arduino core. Open each `.ino` in a sketch folder of the same name. Configure local Wi-Fi and Worker values without committing credentials. Serve the dashboard locally for LAN testing and set its ESP32 API URL as described in [LAN integration](docs/LAN_INTEGRATION.md).
+
+Arming now treats the initial beam state as expected-present, so an absent beam on the first sample generates a break event. Changing between loud and silent modes clears an existing buzzer alarm. Validate both transitions, beam restoration, event counters, and notification delivery with the actual hardware. The local control API still has no application authentication; use a trusted isolated test network.
